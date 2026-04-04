@@ -1,3 +1,4 @@
+# Core pipeline - dari pyproject.toml
 anthropic>=0.39.0,<1.0
 requests>=2.31.0,<3.0
 Pillow>=10.0.0,<11.0
@@ -8,3 +9,12 @@ google-auth-oauthlib>=1.1.0,<2.0
 openai-whisper>=20231117
 PyYAML>=6.0,<7.0
 edge-tts>=6.1.0,<7.0
+
+# Optional providers
+google-generativeai>=0.8.0
+openai>=1.0.0
+elevenlabs>=1.0.0
+
+# Utils
+tqdm>=4.60.0
+colorlog>=6.0.0
