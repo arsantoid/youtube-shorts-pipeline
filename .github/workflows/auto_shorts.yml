@@ -1,0 +1,64 @@
+name: Auto YouTube Shorts
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # Setiap hari jam 07:00 WIB (00:00 UTC)
+  workflow_dispatch:         # Bisa trigger manual dari GitHub
+
+jobs:
+  generate-and-upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg & dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg espeak-ng
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Setup YouTube token
+        run: |
+          mkdir -p ~/.config/verticals
+          echo '${{ secrets.YOUTUBE_TOKEN_JSON }}' > ~/.config/verticals/youtube_token.json
+          echo '${{ secrets.YOUTUBE_CLIENT_SECRET_JSON }}' > ~/.config/verticals/client_secret.json
+
+      - name: Setup API keys config
+        run: |
+          mkdir -p ~/.config/verticals
+          cat > ~/.config/verticals/config.yaml << EOF
+          llm_provider: gemini
+          tts_provider: edge
+          visuals_provider: pexels
+          youtube_token_path: ~/.config/verticals/youtube_token.json
+          youtube_client_secret_path: ~/.config/verticals/client_secret.json
+          EOF
+
+      - name: Run pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          NICHE: ${{ vars.NICHE || 'tech' }}
+        run: python auto_run.py
+
+      - name: Upload artifacts (jika gagal upload YouTube)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shorts-output-${{ github.run_number }}
+          path: output/
+          retention-days: 3
