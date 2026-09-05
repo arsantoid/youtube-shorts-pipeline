@@ -403,3 +403,6 @@ Follow: [@irushi](https://twitter.com/irushi) on X · [@rushindrasinha](https://
 ## License
 
 MIT
+
+
+<!-- Security scan triggered at 2026-09-05 07:22:59 -->
